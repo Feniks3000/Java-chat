@@ -1,0 +1,11 @@
+.root{
+    -fx-font-size: 16;
+}
+
+.text-area {
+    -fx-control-inner-background: Lavender;
+    -fx-text-fill: MidnightBlue;
+    -fx-highlight-fill: LightSkyBlue;
+    -fx-font-style: italic;
+    -fx-font-weight: bold;
+}
