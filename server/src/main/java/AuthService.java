@@ -10,4 +10,6 @@ public interface AuthService {
     boolean removeUser(String login) throws SQLException;
 
     boolean changeLogin(String login, String s) throws SQLException;
+
+    void changePassword(String login, String trim) throws SQLException;
 }

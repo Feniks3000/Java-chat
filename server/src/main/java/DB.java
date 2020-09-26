@@ -72,4 +72,9 @@ public class DB {
         String sql = String.format("UPDATE USERS SET LOGIN = '%s' WHERE LOGIN = '%s'", newLogin, login);
         statement.executeUpdate(sql);
     }
+
+    public static void changePassword(String login, String newPassword) throws SQLException {
+        String sql = String.format("UPDATE USERS SET PASSWORD = '%s' WHERE LOGIN = '%s'", newPassword, login);
+        statement.executeUpdate(sql);
+    }
 }

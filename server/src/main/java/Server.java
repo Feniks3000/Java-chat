@@ -47,7 +47,7 @@ public class Server {
         }
     }
 
-    private void broadcastClientList() {
+    public void broadcastClientList() {
         StringBuilder clientList = new StringBuilder("/clients ");
         for (ClientHandler client : clients) {
             clientList.append(client.getLogin()).append(" ");

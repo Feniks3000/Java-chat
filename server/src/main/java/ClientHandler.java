@@ -53,13 +53,24 @@ public class ClientHandler {
                                     sendMessage("Недопустимый формат команды. Ожидалось сообщение вида '/changeLogin newLogin'");
                                     continue;
                                 }
-                                String newLogin = command[1].trim();
+                                String newLogin = command[1].trim().toLowerCase();
                                 if (!server.getAuthService().changeLogin(login, newLogin)) {
                                     sendMessage("Пользователь с таким логином существует");
                                     continue;
                                 }
                                 server.broadcastMessage(String.format("=> Пользователь %s изменил имя на %s", login, newLogin));
                                 login = newLogin;
+                                server.broadcastClientList();
+                                continue;
+                            }
+                            if (message.startsWith("/changePassword ")) {
+                                String[] command = message.split("\\s+", 2);
+                                if (command.length < 2 || StringUtils.isEmpty(command[1].trim())) {
+                                    sendMessage("Недопустимый формат команды. Ожидалось сообщение вида '/changePassword newPassword'");
+                                    continue;
+                                }
+                                server.getAuthService().changePassword(login, command[1].trim());
+                                sendMessage("=> Пароль изменен");
                                 continue;
                             }
                             sendMessage("Служебное сообщение данного вида не найдено");

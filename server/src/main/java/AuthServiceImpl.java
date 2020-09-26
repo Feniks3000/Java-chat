@@ -40,4 +40,9 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
     }
+
+    @Override
+    public void changePassword(String login, String newPassword) throws SQLException {
+        DB.changePassword(login, newPassword);
+    }
 }
