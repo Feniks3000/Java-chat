@@ -1,15 +1,12 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Vector;
 
 public class Server {
     private List<ClientHandler> clients;
     private AuthService authService = new AuthServiceImpl();
-
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
 
     ServerSocket server;
     Socket socket;
@@ -21,14 +18,16 @@ public class Server {
             server = new ServerSocket(port);
             System.out.printf("Сервер запущен на порту %d\n", port);
 
+            DB.connect("main.db");
             while (true) {
                 socket = server.accept();
                 System.out.println("=> Подключился клиент");
                 new ClientHandler(this, socket);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            DB.disconnect();
             try {
                 server.close();
             } catch (IOException e) {

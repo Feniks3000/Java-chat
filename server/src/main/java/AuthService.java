@@ -1,11 +1,13 @@
+import java.sql.SQLException;
+
 public interface AuthService {
-    boolean userExist(String login, String passHash);
+    boolean userExist(String login, String passHash) throws SQLException;
 
-    boolean loginBusy(String login);
+    boolean loginBusy(String login) throws SQLException;
 
-    boolean addUser(String login, String passHash);
+    boolean addUser(String login, String passHash) throws SQLException;
 
-    boolean removeUser(String login);
+    boolean removeUser(String login) throws SQLException;
 
-    UserData getUserByLogin(String login);
+    boolean changeLogin(String login, String s) throws SQLException;
 }
