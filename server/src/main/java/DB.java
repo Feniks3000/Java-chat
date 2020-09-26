@@ -29,10 +29,16 @@ public class DB {
         DB.preparedStatement = preparedStatement;
     }
 
-    public static void connect(String name) throws ClassNotFoundException, SQLException {
-        Class.forName("org.sqlite.JDBC");
-        connection = DriverManager.getConnection("jdbc:sqlite:" + name);
-        statement = connection.createStatement();
+    public static boolean connect(String name) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + name);
+            statement = connection.createStatement();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static void disconnect() {
