@@ -141,6 +141,10 @@ public class Controller implements Initializable {
                                 printMessage("Чат завершен");
                                 break;
                             }
+                            if (message.startsWith("/newLogin ")) {
+                                String[] command = message.split("\\s+", 2);
+                                setTitle("Simple chat for " + command[1]);
+                            }
                             if (message.startsWith("/clients ")) {
                                 String[] clients = message.substring(9).split("\\s+");
                                 updateClients(clients);

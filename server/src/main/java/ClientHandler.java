@@ -60,6 +60,7 @@ public class ClientHandler {
                                 }
                                 server.broadcastMessage(String.format("=> Пользователь %s изменил имя на %s", login, newLogin));
                                 login = newLogin;
+                                sendMessage(String.format("/newLogin %s", login));
                                 server.broadcastClientList();
                                 continue;
                             }
