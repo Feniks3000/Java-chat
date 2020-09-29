@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Vector;
 
@@ -9,31 +8,34 @@ public class Server {
     private List<ClientHandler> clients;
     private AuthService authService = new AuthServiceImpl();
 
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
-
     ServerSocket server;
     Socket socket;
 
     public Server(int port) {
         clients = new Vector<>();
 
-        try {
-            server = new ServerSocket(port);
-            System.out.printf("Сервер запущен на порту %d\n", port);
-
-            while (true) {
-                socket = server.accept();
-                System.out.println("=> Подключился клиент");
-                new ClientHandler(this, socket);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        if (DB.connect("main.db")) {
             try {
-                server.close();
-            } catch (IOException e) {
+                server = new ServerSocket(port);
+                System.out.printf("Сервер запущен на порту %d\n", port);
+
+                while (true) {
+                    socket = server.accept();
+                    System.out.println("=> Подключился клиент");
+                    new ClientHandler(this, socket);
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                DB.disconnect();
+                try {
+                    server.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } else {
+            System.out.println("Ошибка подключения к БД");
         }
     }
 
@@ -48,7 +50,7 @@ public class Server {
         }
     }
 
-    private void broadcastClientList() {
+    public void broadcastClientList() {
         StringBuilder clientList = new StringBuilder("/clients ");
         for (ClientHandler client : clients) {
             clientList.append(client.getLogin()).append(" ");
@@ -90,6 +92,7 @@ public class Server {
         }
         return false;
     }
+
     public ClientHandler getClientByLogin(String login) {
         for (ClientHandler client : clients) {
             if (client.getLogin().equals(login)) {

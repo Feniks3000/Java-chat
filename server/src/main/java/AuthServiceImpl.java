@@ -1,37 +1,20 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.SQLException;
 
 public class AuthServiceImpl implements AuthService {
-    private List<UserData> users;
-
-    public AuthServiceImpl() {
-        this.users = new ArrayList<>();
+    @Override
+    public boolean userExist(String login, String passHash) throws SQLException {
+        return DB.userExist(login, passHash) != 0;
     }
 
     @Override
-    public boolean userExist(String login, String passHash) {
-        for (UserData user : users) {
-            if (user.getLogin().equals(login) && user.getPassHash().equals(passHash)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean loginBusy(String login) throws SQLException {
+        return DB.userExist(login) != 0;
     }
 
     @Override
-    public boolean loginBusy(String login) {
-        for (UserData user : users) {
-            if (user.getLogin().equals(login)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean addUser(String login, String passHash) {
+    public boolean addUser(String login, String passHash) throws SQLException {
         if (!loginBusy(login) && !userExist(login, passHash)) {
-            users.add(new UserData(login, passHash));
+            DB.insertUser(login, passHash);
             return true;
         } else {
             return false;
@@ -39,9 +22,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean removeUser(String login) {
+    public boolean removeUser(String login) throws SQLException {
         if (loginBusy(login)) {
-            users.remove(getUserByLogin(login));
+            DB.deleteUser(login);
             return true;
         } else {
             return false;
@@ -49,12 +32,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserData getUserByLogin(String login) {
-        for (UserData user : users) {
-            if (user.getLogin().equals(login)) {
-                return user;
-            }
+    public boolean changeLogin(String login, String newLogin) throws SQLException {
+        if (!loginBusy(newLogin)) {
+            DB.changeLogin(login, newLogin);
+            return true;
+        } else {
+            return false;
         }
-        return null;
+    }
+
+    @Override
+    public void changePassword(String login, String newPassword) throws SQLException {
+        DB.changePassword(login, newPassword);
     }
 }

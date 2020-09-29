@@ -96,9 +96,7 @@ public class Controller implements Initializable {
             String pass = passField.getText().trim();
             if (StringUtils.isNotEmpty(login) && StringUtils.isNotEmpty(pass)) {
                 try {
-                    MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-                    String passHash = Arrays.toString(messageDigest.digest(pass.getBytes(StandardCharsets.UTF_8)));
-                    out.writeUTF(String.format("/auth %s %s", login, passHash));
+                    out.writeUTF(String.format("/auth %s %s", login, getPassHash(pass)));
                     passField.clear();
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
@@ -109,6 +107,11 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getPassHash(String pass) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        return Arrays.toString(messageDigest.digest(pass.getBytes(StandardCharsets.UTF_8)));
     }
 
     private void connectTo(String ip, int port) {
@@ -137,6 +140,10 @@ public class Controller implements Initializable {
                             if (message.equals("/end")) {
                                 printMessage("Чат завершен");
                                 break;
+                            }
+                            if (message.startsWith("/newLogin ")) {
+                                String[] command = message.split("\\s+", 2);
+                                setTitle("Simple chat for " + command[1]);
                             }
                             if (message.startsWith("/clients ")) {
                                 String[] clients = message.substring(9).split("\\s+");
@@ -177,6 +184,18 @@ public class Controller implements Initializable {
                 if (message.startsWith("/note ")) {
                     if (message.length() > 6) {
                         printMessage(String.format("Личная заметка: %s", messageField.getText().substring(6)));
+                        messageField.clear();
+                        messageField.requestFocus();
+                    }
+                } else if (message.startsWith("/changePassword ")) {
+                    String[] command = message.split("\\s+", 2);
+                    if (command.length < 2 || StringUtils.isEmpty(command[1].trim())) {
+                        printMessage("Неправильный формат команды смены пароля! Ожидается '/changePassword newPassword'");
+                        messageField.requestFocus();
+                    } else {
+                        out.writeUTF(String.format("/changePassword %s", getPassHash(command[1])));
+                        messageField.clear();
+                        messageField.requestFocus();
                     }
                 } else {
                     out.writeUTF(message);
@@ -184,7 +203,7 @@ public class Controller implements Initializable {
                     messageField.requestFocus();
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
