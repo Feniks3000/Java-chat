@@ -72,8 +72,11 @@ public class Controller implements Initializable {
         clients.setManaged(authenticated);
 
         if (authenticated) {
+            LogsController.start(String.format("logs/%s.txt", loginField.getText()));
+            history.appendText(LogsController.getLastRows(100));
             setTitle("Simple chat for " + loginField.getText().trim().toLowerCase());
         } else {
+            LogsController.stop();
             setTitle("Simple chat");
             history.clear();
         }
@@ -211,6 +214,7 @@ public class Controller implements Initializable {
     private void printMessage(String message) {
         if (message.length() > 0) {
             history.appendText(String.format("%s\n\n", message));
+            LogsController.write(String.format("%s\n\n", message));
         }
     }
 
