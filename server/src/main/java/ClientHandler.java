@@ -8,18 +8,21 @@ import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public class ClientHandler {
-        private Server server;
-        private Socket socket;
-        private String login;
-        private DataInputStream in;
-        private DataOutputStream out;
-        private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+    private Server server;
+    private Socket socket;
+    private String login;
+    private DataInputStream in;
+    private DataOutputStream out;
+    Logger logger;
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    public ClientHandler(Server server, Socket socket) {
+    public ClientHandler(Server server, Socket socket, Logger logger) {
         this.server = server;
         this.socket = socket;
+        this.logger = logger;
 
         try {
             in = new DataInputStream(socket.getInputStream());
@@ -82,7 +85,7 @@ public class ClientHandler {
                 }
             } catch (SocketTimeoutException e) {
                 sendMessage("/end");
-                System.out.println("Сокет закрыт по таймауту");
+                logger.warning("Сокет закрыт по таймауту");
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             } finally {
@@ -115,11 +118,11 @@ public class ClientHandler {
                         server.subscribe(this);
                         return true;
                     } else {
-                        System.out.printf("%s пытается открыть чат в другом окне\n", token[1]);
+                        logger.info(String.format("%s пытается открыть чат в другом окне", token[1]));
                         sendMessage(String.format("%s вы уже аторизованы в другом окне\n", token[1]));
                     }
                 } else {
-                    System.out.printf("%s ввел неверный пароль\n", token[1]);
+                    logger.warning(String.format("%s ввел неверный пароль", token[1]));
                     sendMessage("Неверный логин / пароль");
                 }
             }
