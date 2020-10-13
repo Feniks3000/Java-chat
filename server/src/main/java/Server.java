@@ -1,28 +1,34 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.*;
 
 public class Server {
     private List<ClientHandler> clients;
     private AuthService authService = new AuthServiceImpl();
+    Logger logger = Logger.getLogger(getClass().getName());
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
 
     ServerSocket server;
     Socket socket;
 
     public Server(int port) {
+        getLoggerParameters(logger);
         clients = new Vector<>();
 
         if (DB.connect("main.db")) {
             try {
                 server = new ServerSocket(port);
-                System.out.printf("Сервер запущен на порту %d\n", port);
+                logger.info(String.format("Сервер запущен на порту %d", port));
 
                 while (true) {
                     socket = server.accept();
-                    System.out.println("=> Подключился клиент");
-                    new ClientHandler(this, socket);
+                    logger.info("=> Подключился клиент");
+                    new ClientHandler(this, socket, logger);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -35,7 +41,33 @@ public class Server {
                 }
             }
         } else {
-            System.out.println("Ошибка подключения к БД");
+            logger.severe("Ошибка подключения к БД");
+        }
+    }
+
+    public void getLoggerParameters(Logger logger) {
+        try {
+            Handler consoleHandler = new ConsoleHandler();
+            consoleHandler.setLevel(Level.ALL);
+            Handler fileHandler = new FileHandler("server_%g.log", 1024 * 100, 10, true);
+            fileHandler.setLevel(Level.INFO);
+            consoleHandler.setFormatter(new Formatter() {
+                @Override
+                public String format(LogRecord record) {
+                    return String.format("%s %s (%s) => %s\n", record.getLoggerName(), record.getLevel(), simpleDateFormat.format(new Date(record.getMillis())), record.getMessage());
+                }
+            });
+            fileHandler.setFormatter(new Formatter() {
+                @Override
+                public String format(LogRecord record) {
+                    return String.format("%s, %s, %s => %s\n", record.getLoggerName(), simpleDateFormat.format(new Date(record.getMillis())), record.getLevel(), record.getMessage());
+                }
+            });
+            logger.addHandler(consoleHandler);
+            logger.addHandler(fileHandler);
+            logger.setUseParentHandlers(false);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -44,7 +76,7 @@ public class Server {
     }
 
     public void broadcastMessage(String message) {
-        System.out.println(message);
+        logger.fine(message);
         for (ClientHandler client : clients) {
             client.sendMessage(message);
         }
